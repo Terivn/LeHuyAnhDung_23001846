@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bài 2 - Ứng dụng đặt vé xem phim bằng VueJS." />
+  <title>Bài 2 · Đặt vé xem phim</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">V6</span>
+        <span>
+          VueJS · Week 6
+          <small>Bài tập thực hành số 6</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="index.html">Trang chủ</a>
+        <a href="bai1.html">Bài 1 · Thẻ sinh viên</a>
+        <a class="is-active" href="bai2.html">Bài 2 · Đặt vé</a>
+        <a href="bai3.html">Bài 3 · Công việc</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="app" v-cloak>
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>Bài 2 · Form &amp; computed</span>
+      <h1>Đặt vé xem phim</h1>
+      <p>
+        Nhập thông tin, chọn suất chiếu và loại vé. Tổng tiền được tính tự động bằng
+        <span class="code-chip">computed</span>; form chỉ gửi khi họ tên và số lượng hợp lệ.
+      </p>
+    </div>
+
+    <div class="booking-layout">
+      <!-- FORM ĐẶT VÉ -->
+      <section class="panel">
+        <div class="panel__head">
+          <h2>Thông tin đặt vé</h2>
+          <p>Các trường có dấu <strong>*</strong> là bắt buộc.</p>
+        </div>
+        <div class="panel__body">
+          <form @submit.prevent="datVe" novalidate>
+            <div class="field">
+              <label class="field__label" for="hoTen">
+                <span>Họ tên khách hàng <span aria-hidden="true">*</span></span>
+                <span class="field__hint">v-model.trim</span>
+              </label>
+              <input
+                id="hoTen"
+                class="input"
+                :class="{ 'is-invalid': daGui && !hoTen.trim() }"
+                type="text"
+                v-model.trim="hoTen"
+                placeholder="Ví dụ: Lê Huy Anh Dũng"
+                autocomplete="name"
+                maxlength="60"
+              />
+              <p class="field__error" v-if="daGui && !hoTen.trim()">
+                Vui lòng nhập họ tên khách hàng.
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field__label" for="suatChieu">
+                <span>Suất chiếu <span aria-hidden="true">*</span></span>
+                <span class="field__hint">select</span>
+              </label>
+              <select id="suatChieu" class="select" v-model="suatChieu">
+                <option v-for="suat in suatChieus" :key="suat.ma" :value="suat.ma">
+                  {{ suat.nhan }}
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <span class="field__label">
+                <span>Loại vé <span aria-hidden="true">*</span></span>
+                <span class="field__hint">radio</span>
+              </span>
+              <div class="choice-grid">
+                <label
+                  class="choice"
+                  :class="{ 'is-active': loaiVe === ve.ma }"
+                  v-for="ve in loaiVes"
+                  :key="ve.ma"
+                >
+                  <input type="radio" name="loaiVe" :value="ve.ma" v-model="loaiVe" />
+                  <span>
+                    <span class="choice__title">{{ ve.nhan }}</span>
+                    <span class="choice__price">{{ dinhDangTien(ve.gia) }} / vé</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">
+                <span>Số lượng vé <span aria-hidden="true">*</span></span>
+                <span class="field__hint">v-model.number · 1 – 10</span>
+              </span>
+              <div class="qty-row">
+                <button
+                  class="btn btn--ghost btn--icon"
+                  type="button"
+                  aria-label="Giảm số lượng"
+                  :disabled="soLuongHopLe && soLuong <= 1"
+                  @click="giamSoLuong"
+                >
+                  −
+                </button>
+                <input
+                  id="soLuong"
+                  class="input"
+                  :class="{ 'is-invalid': !!loiSoLuong }"
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="1"
+                  inputmode="numeric"
+                  v-model.number="soLuong"
+                  @blur="chuanHoaSoLuong"
+                  aria-label="Số lượng vé"
+                  aria-describedby="loi-so-luong"
+                />
+                <button
+                  class="btn btn--ghost btn--icon"
+                  type="button"
+                  aria-label="Tăng số lượng"
+                  :disabled="soLuongHopLe && soLuong >= 10"
+                  @click="tangSoLuong"
+                >
+                  +
+                </button>
+                <span class="qty-total" v-if="soLuongHopLe">
+                  = {{ dinhDangTien(tienVe) }}
+                </span>
+              </div>
+              <p class="field__error" id="loi-so-luong" v-if="loiSoLuong">
+                {{ loiSoLuong }}
+              </p>
+            </div>
+
+            <div class="field">
+              <span class="field__label">
+                <span>Combo bắp nước</span>
+                <span class="field__hint">tùy chọn</span>
+              </span>
+              <label class="combo-box" :class="{ 'is-active': coCombo }">
+                <input type="checkbox" v-model="coCombo" />
+                <span>
+                  <span class="combo-box__title">Combo bắp + nước</span>
+                  <span class="combo-box__desc">Áp dụng một lần cho mỗi đơn đặt vé</span>
+                </span>
+                <span class="combo-box__price">+ {{ dinhDangTien(giaCombo) }}</span>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn--primary" type="submit" :disabled="!coTheDatVe">
+                Đặt vé
+              </button>
+              <button class="btn btn--ghost" type="button" @click="datLai">
+                Đặt lại form
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- TÓM TẮT ĐƠN -->
+      <aside class="panel summary">
+        <div class="summary__movie">
+          <span>Phim đang chiếu</span>
+          <h2>Hành Trình Về Nhà</h2>
+          <p>120 phút · T13 · 2D / 3D / IMAX</p>
+        </div>
+
+        <div class="summary__body">
+          <div class="summary__line">
+            <span>Khách hàng</span>
+            <strong>{{ hoTen.trim() || 'Chưa nhập' }}</strong>
+          </div>
+          <div class="summary__line">
+            <span>Suất chiếu</span>
+            <strong>{{ suatChieuDangChon.nhan }}</strong>
+          </div>
+          <div class="summary__line">
+            <span>Loại vé</span>
+            <strong>{{ veDangChon.nhan }} · {{ dinhDangTien(veDangChon.gia) }}</strong>
+          </div>
+          <div class="summary__line">
+            <span>Số lượng</span>
+            <strong>{{ soLuongHopLe ? soLuong + ' vé' : 'Chưa hợp lệ' }}</strong>
+          </div>
+          <div class="summary__line">
+            <span>Tiền vé</span>
+            <strong>{{ dinhDangTien(tienVe) }}</strong>
+          </div>
+          <div class="summary__line">
+            <span>Combo bắp nước</span>
+            <strong>{{ coCombo ? dinhDangTien(tienCombo) : 'Không chọn' }}</strong>
+          </div>
+
+          <div class="summary__total">
+            <span>Tổng tiền</span>
+            <strong>{{ dinhDangTien(tongTien) }}</strong>
+          </div>
+          <p class="summary__note">
+            Tổng tiền = giá vé × số lượng + tiền combo
+          </p>
+
+          <!-- Thông tin xác nhận hiện ngay trên trang -->
+          <div class="confirmation" id="xac-nhan" v-if="xacNhan" role="status" aria-live="polite">
+            <div class="confirmation__head">
+              <span aria-hidden="true">✓</span>
+              <span>Đặt vé thành công</span>
+              <span class="confirmation__code">{{ xacNhan.maVe }}</span>
+            </div>
+            <ul class="confirmation__list">
+              <li><span>Khách hàng</span><strong>{{ xacNhan.hoTen }}</strong></li>
+              <li><span>Suất chiếu</span><strong>{{ xacNhan.suatChieu }}</strong></li>
+              <li><span>Loại vé</span><strong>{{ xacNhan.loaiVe }}</strong></li>
+              <li><span>Số lượng</span><strong>{{ xacNhan.soLuong }} vé</strong></li>
+              <li><span>Combo</span><strong>{{ xacNhan.coCombo ? 'Có' : 'Không' }}</strong></li>
+            </ul>
+            <div class="confirmation__total">
+              <span>Tổng thanh toán</span>
+              <span>{{ dinhDangTien(xacNhan.tongTien) }}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài 2 · Đặt vé xem phim
+  </footer>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="js/bai2.js"></script>
+</body>
+</html>

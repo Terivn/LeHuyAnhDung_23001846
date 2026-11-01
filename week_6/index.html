@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bài tập thực hành số 6 - VueJS: thẻ sinh viên, đặt vé xem phim, quản lý công việc." />
+  <title>Week 6 · Bài tập VueJS</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">V6</span>
+        <span>
+          VueJS · Week 6
+          <small>Bài tập thực hành số 6</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a class="is-active" href="index.html">Trang chủ</a>
+        <a href="bai1.html">Bài 1 · Thẻ sinh viên</a>
+        <a href="bai2.html">Bài 2 · Đặt vé</a>
+        <a href="bai3.html">Bài 3 · Công việc</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div>
+        <span class="eyebrow"><span class="eyebrow__dot"></span>Vue 3 · Composition API không cần build</span>
+        <h1>Học VueJS qua <span class="gradient">3 ứng dụng nhỏ</span>, chạy được ngay.</h1>
+        <p class="hero__lead">
+          Mỗi bài là một ứng dụng hoàn chỉnh dùng <strong>createApp</strong>, <strong>data()</strong>,
+          <strong>computed</strong>, <strong>methods</strong> và các directive quen thuộc:
+          <span class="code-chip">{{ }}</span>, <span class="code-chip">v-text</span>,
+          <span class="code-chip">v-bind</span>, <span class="code-chip">v-model</span>,
+          <span class="code-chip">v-for</span>, <span class="code-chip">v-if</span>,
+          <span class="code-chip">v-show</span>.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="bai1.html">Bắt đầu với Bài 1 <span aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost" href="#danh-sach-bai">Xem danh sách bài</a>
+        </div>
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <strong>3</strong>
+            <span>bài thực hành</span>
+          </div>
+          <div class="hero__stat">
+            <strong>100%</strong>
+            <span>chạy offline</span>
+          </div>
+          <div class="hero__stat">
+            <strong>Vue 3</strong>
+            <span>global build</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-card" aria-hidden="true">
+        <div class="code-card__bar">
+          <span></span><span></span><span></span>
+          <em>bai1.js</em>
+        </div>
+        <pre><code><span class="tok-com">&lt;!-- Template --&gt;</span>
+<span class="tok-tag">&lt;h1&gt;</span>{{ sinhVien.hoTen }}<span class="tok-tag">&lt;/h1&gt;</span>
+<span class="tok-tag">&lt;span</span> <span class="tok-attr">v-text</span>=<span class="tok-str">"sinhVien.lop"</span><span class="tok-tag">&gt;&lt;/span&gt;</span>
+<span class="tok-tag">&lt;img</span> <span class="tok-attr">:src</span>=<span class="tok-str">"sinhVien.anhDaiDien"</span>
+     <span class="tok-attr">:alt</span>=<span class="tok-str">"sinhVien.hoTen"</span> <span class="tok-tag">/&gt;</span>
+<span class="tok-tag">&lt;span</span> <span class="tok-attr">:class</span>=<span class="tok-str">"xepLoaiClass"</span><span class="tok-tag">&gt;</span>
+  {{ xepLoai }}
+<span class="tok-tag">&lt;/span&gt;</span>
+
+<span class="tok-com">// JavaScript</span>
+createApp({
+  data: () => ({ sinhVien: { ... } }),
+  computed: { xepLoai() { ... } }
+}).mount(<span class="tok-str">'#app'</span>)</code></pre>
+      </div>
+    </section>
+
+    <section id="danh-sach-bai" aria-labelledby="danh-sach-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="danh-sach-title">Danh sách bài thực hành</h2>
+          <p>Mở từng bài để xem yêu cầu và thao tác trực tiếp trên giao diện.</p>
+        </div>
+      </div>
+
+      <div class="exercise-grid">
+        <a class="exercise-card" href="bai1.html">
+          <div class="exercise-card__top">
+            <span class="exercise-card__num">01</span>
+            <span class="exercise-card__label">Directive cơ bản</span>
+          </div>
+          <h2>Thẻ thông tin sinh viên</h2>
+          <p>
+            Hiển thị hồ sơ sinh viên, tự xếp loại theo điểm trung bình và đổi màu xếp loại.
+            Bật/tắt phần giới thiệu bằng <strong>v-show</strong>.
+          </p>
+          <div class="tags">
+            <span class="tag">{{ }}</span>
+            <span class="tag">v-text</span>
+            <span class="tag">v-bind</span>
+            <span class="tag">v-if</span>
+            <span class="tag">v-show</span>
+          </div>
+          <span class="exercise-card__link">Mở Bài 1 <span aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="exercise-card" href="bai2.html">
+          <div class="exercise-card__top">
+            <span class="exercise-card__num">02</span>
+            <span class="exercise-card__label">Form &amp; computed</span>
+          </div>
+          <h2>Đặt vé xem phim</h2>
+          <p>
+            Chọn suất chiếu, loại vé, số lượng và combo bắp nước. Tổng tiền cập nhật tức thì,
+            form chỉ cho đặt khi dữ liệu hợp lệ.
+          </p>
+          <div class="tags">
+            <span class="tag">v-model.trim</span>
+            <span class="tag">v-model.number</span>
+            <span class="tag">computed</span>
+            <span class="tag">@submit.prevent</span>
+          </div>
+          <span class="exercise-card__link">Mở Bài 2 <span aria-hidden="true">→</span></span>
+        </a>
+
+        <a class="exercise-card" href="bai3.html">
+          <div class="exercise-card__top">
+            <span class="exercise-card__num">03</span>
+            <span class="exercise-card__label">Danh sách động</span>
+          </div>
+          <h2>Quản lý công việc cá nhân</h2>
+          <p>
+            Thêm việc bằng nút hoặc phím Enter, đánh dấu hoàn thành, xóa từng việc và lọc theo
+            trạng thái. Số liệu luôn được tính tự động.
+          </p>
+          <div class="tags">
+            <span class="tag">v-for</span>
+            <span class="tag">:key</span>
+            <span class="tag">checkbox</span>
+            <span class="tag">computed</span>
+            <span class="tag">.prevent</span>
+          </div>
+          <span class="exercise-card__link">Mở Bài 3 <span aria-hidden="true">→</span></span>
+        </a>
+      </div>
+    </section>
+
+    <div class="note">
+      <span class="note__icon" aria-hidden="true">i</span>
+      <p>
+        <strong>Cách chạy:</strong> mở trực tiếp <code>week_6/index.html</code> bằng trình duyệt.
+        Vue 3 đã được đặt sẵn trong thư mục <code>vendor/</code> nên không cần mạng và không cần
+        cài đặt thêm. Xem chi tiết trong <code>README.md</code>.
+      </p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài tập thực hành số 6 · VueJS
+  </footer>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bài 3 - Ứng dụng quản lý công việc cá nhân bằng VueJS." />
+  <title>Bài 3 · Quản lý công việc cá nhân</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">V6</span>
+        <span>
+          VueJS · Week 6
+          <small>Bài tập thực hành số 6</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="index.html">Trang chủ</a>
+        <a href="bai1.html">Bài 1 · Thẻ sinh viên</a>
+        <a href="bai2.html">Bài 2 · Đặt vé</a>
+        <a class="is-active" href="bai3.html">Bài 3 · Công việc</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page page--narrow" id="app" v-cloak>
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>Bài 3 · Danh sách động</span>
+      <h1>Quản lý công việc cá nhân</h1>
+      <p>
+        Thêm việc bằng nút hoặc phím Enter, đánh dấu hoàn thành, xóa từng việc và lọc theo
+        trạng thái. Mọi thay đổi cập nhật ngay, không tải lại trang.
+      </p>
+    </div>
+
+    <section class="panel todo-panel">
+      <div class="todo-hero">
+        <h2>Công việc trong ngày</h2>
+        <p>Giữ danh sách gọn gàng, xử lý từng việc một.</p>
+        <div class="todo-stats" aria-live="polite">
+          <span class="todo-stat">Tổng: <strong>{{ tongSoViec }}</strong></span>
+          <span class="todo-stat">Chưa xong: <strong>{{ soViecChuaXong }}</strong></span>
+          <span class="todo-stat">Đã xong: <strong>{{ soViecDaXong }}</strong></span>
+        </div>
+      </div>
+
+      <div class="todo-body">
+        <form class="todo-composer" @submit.prevent="themViec">
+          <label class="visually-hidden" for="tenViec">Tên công việc mới</label>
+          <input
+            id="tenViec"
+            class="input"
+            :class="{ 'is-invalid': !!loi }"
+            type="text"
+            v-model.trim="newTask"
+            placeholder="Nhập tên công việc mới…"
+            maxlength="120"
+            autocomplete="off"
+            @input="loi = ''"
+            @keyup.esc="newTask = ''"
+          />
+          <button class="btn btn--primary" type="submit">Thêm</button>
+        </form>
+        <p class="field__error todo-error" v-if="loi" role="alert">
+          <span aria-hidden="true">!</span>{{ loi }}
+        </p>
+
+        <div class="todo-toolbar">
+          <div class="filter-tabs" role="group" aria-label="Lọc công việc theo trạng thái">
+            <button
+              v-for="boLoc in boLocs"
+              :key="boLoc.ma"
+              class="filter-tab"
+              :class="{ 'is-active': filter === boLoc.ma }"
+              type="button"
+              :aria-pressed="filter === boLoc.ma"
+              @click="filter = boLoc.ma"
+            >
+              {{ boLoc.nhan }}
+              <span class="filter-tab__count">{{ demTheoBoLoc(boLoc.ma) }}</span>
+            </button>
+          </div>
+          <button
+            class="btn btn--danger"
+            type="button"
+            :disabled="soViecDaXong === 0"
+            @click="xoaViecDaHoanThanh"
+          >
+            Xóa các việc đã hoàn thành
+          </button>
+        </div>
+
+        <!-- Danh sách công việc -->
+        <ul class="task-list" v-if="danhSachLoc.length">
+          <li
+            v-for="viec in danhSachLoc"
+            :key="viec.id"
+            class="task"
+            :class="{ 'is-done': viec.hoanThanh }"
+          >
+            <input
+              type="checkbox"
+              v-model="viec.hoanThanh"
+              :aria-label="'Đánh dấu hoàn thành: ' + viec.ten"
+            />
+            <span class="task__name">{{ viec.ten }}</span>
+            <button
+              class="task__delete"
+              type="button"
+              :aria-label="'Xóa công việc: ' + viec.ten"
+              title="Xóa công việc"
+              @click="xoaViec(viec.id)"
+            >
+              ×
+            </button>
+          </li>
+        </ul>
+
+        <!-- Thông báo khi danh sách hoặc kết quả lọc rỗng -->
+        <div class="empty-state" v-else>
+          <div class="empty-state__icon" aria-hidden="true">{{ thongBaoRong.icon }}</div>
+          <strong>{{ thongBaoRong.tieuDe }}</strong>
+          <p>{{ thongBaoRong.moTa }}</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài 3 · Quản lý công việc cá nhân
+  </footer>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="js/bai3.js"></script>
+</body>
+</html>

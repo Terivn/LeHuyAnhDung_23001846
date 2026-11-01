@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bài 1 - Thẻ thông tin sinh viên bằng VueJS." />
+  <title>Bài 1 · Thẻ thông tin sinh viên</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">V6</span>
+        <span>
+          VueJS · Week 6
+          <small>Bài tập thực hành số 6</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="index.html">Trang chủ</a>
+        <a class="is-active" href="bai1.html">Bài 1 · Thẻ sinh viên</a>
+        <a href="bai2.html">Bài 2 · Đặt vé</a>
+        <a href="bai3.html">Bài 3 · Công việc</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="app" v-cloak>
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>Bài 1 · Directive cơ bản</span>
+      <h1>Thẻ thông tin sinh viên</h1>
+      <p>
+        Họ tên hiển thị bằng <span class="code-chip" v-pre>{{ }}</span>, lớp dùng
+        <span class="code-chip">v-text</span>, ảnh dùng <span class="code-chip">v-bind</span>.
+        Xếp loại và màu sắc tự cập nhật khi điểm thay đổi.
+      </p>
+    </div>
+
+    <div class="student-layout">
+      <!-- Thẻ sinh viên -->
+      <article class="panel student-card">
+        <div class="student-card__cover" aria-hidden="true"></div>
+        <div class="student-card__body">
+          <div class="student-identity">
+            <div class="avatar-wrap">
+              <img
+                class="avatar"
+                :src="sinhVien.anhDaiDien"
+                :alt="'Ảnh đại diện của ' + sinhVien.hoTen"
+                width="114"
+                height="114"
+              />
+            </div>
+            <div class="student-heading">
+              <h2 class="student-name">{{ sinhVien.hoTen }}</h2>
+              <div class="student-meta">
+                <span class="student-meta__item" v-text="sinhVien.lop"></span>
+                <span class="student-meta__item">MSSV: {{ sinhVien.maSV }}</span>
+                <span
+                  class="badge"
+                  :class="sinhVien.dangHoc ? 'badge--success' : 'badge--muted'"
+                >
+                  {{ trangThai }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="student-stats">
+            <div class="stat">
+              <span class="stat__label">Điểm trung bình</span>
+              <span class="stat__value">
+                <span class="stat__score">{{ diemHienThi }}</span>
+                <span class="hint">/ 10</span>
+              </span>
+            </div>
+            <div class="stat">
+              <span class="stat__label">Xếp loại</span>
+              <span class="stat__value">
+                <span class="rank-badge" :class="xepLoaiClass">{{ xepLoai }}</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- v-if: chỉ hiện khi đủ điều kiện -->
+          <div class="scholarship" v-if="duDieuKienHocBong">
+            <span aria-hidden="true">★</span>
+            <span>Đủ điều kiện xét học bổng (điểm trung bình từ 8,0 trở lên).</span>
+          </div>
+
+          <!-- v-show: bật/tắt bằng nút bên dưới -->
+          <section class="intro" v-show="hienGioiThieu">
+            <div class="intro__head">
+              <h3>Giới thiệu</h3>
+              <button
+                class="btn btn--ghost btn--icon"
+                type="button"
+                title="Ẩn phần giới thiệu"
+                aria-label="Ẩn phần giới thiệu"
+                @click="hienGioiThieu = false"
+              >
+                ×
+              </button>
+            </div>
+            <p>
+              Xin chào! Mình là sinh viên ngành Kỹ thuật phần mềm, thích xây dựng giao diện web,
+              tìm hiểu VueJS và các công nghệ phát triển sản phẩm. Mục tiêu tuần này là hoàn thành
+              ba bài thực hành VueJS thật chỉn chu.
+            </p>
+          </section>
+          <button
+            v-show="!hienGioiThieu"
+            class="btn btn--soft btn--block"
+            type="button"
+            @click="hienGioiThieu = true"
+          >
+            Hiện phần giới thiệu
+          </button>
+        </div>
+      </article>
+
+      <!-- Bảng điều khiển để thấy dữ liệu phản ứng -->
+      <aside class="panel">
+        <div class="panel__head">
+          <h2>Thay đổi dữ liệu</h2>
+          <p>Sửa các trường bên dưới — thẻ sinh viên sẽ cập nhật ngay, không tải lại trang.</p>
+        </div>
+        <div class="panel__body">
+          <div class="control-grid">
+            <label class="field">
+              <span class="field__label">
+                Họ và tên
+                <span class="field__hint">v-model</span>
+              </span>
+              <input
+                class="input"
+                type="text"
+                v-model="sinhVien.hoTen"
+                placeholder="Nhập họ và tên"
+              />
+            </label>
+
+            <label class="field">
+              <span class="field__label">
+                Lớp
+                <span class="field__hint">v-text</span>
+              </span>
+              <input
+                class="input"
+                type="text"
+                v-model="sinhVien.lop"
+                placeholder="Nhập tên lớp"
+              />
+            </label>
+
+            <div class="field">
+              <span class="field__label">
+                Điểm trung bình
+                <span class="field__hint">0 – 10</span>
+              </span>
+              <div class="gpa-control">
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  step="0.1"
+                  v-model.number="sinhVien.diemTrungBinh"
+                  :style="{ '--range-fill': (soDiem / 10 * 100) + '%' }"
+                  aria-label="Điểm trung bình"
+                />
+                <input
+                  class="input"
+                  type="number"
+                  min="0"
+                  max="10"
+                  step="0.1"
+                  v-model.number="sinhVien.diemTrungBinh"
+                  @change="chuanHoaDiem"
+                />
+              </div>
+              <div class="range-labels" aria-hidden="true">
+                <span>0</span>
+                <span>5</span>
+                <span>6,5</span>
+                <span>8</span>
+                <span>10</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label">
+                Trạng thái
+                <span class="field__hint">{{ trangThai }}</span>
+              </span>
+              <label class="switch">
+                <input type="checkbox" v-model="sinhVien.dangHoc" />
+                <span class="switch__track" aria-hidden="true"></span>
+                <span>{{ sinhVien.dangHoc ? 'Đang học' : 'Đã nghỉ' }}</span>
+              </label>
+            </div>
+
+            <div class="field">
+              <span class="field__label">
+                Phần giới thiệu
+                <span class="field__hint">v-show</span>
+              </span>
+              <button
+                class="btn btn--soft"
+                type="button"
+                @click="hienGioiThieu = !hienGioiThieu"
+              >
+                {{ hienGioiThieu ? 'Ẩn giới thiệu' : 'Hiện giới thiệu' }}
+              </button>
+            </div>
+          </div>
+
+          <p class="hint" style="margin: 20px 0 0">
+            Gợi ý kiểm tra: kéo điểm từ 8 xuống 7,9 → xếp loại đổi từ “Giỏi” sang “Khá”;
+            bật/tắt trạng thái → nhãn “Đang học” / “Đã nghỉ” đổi theo.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài 1 · Thẻ thông tin sinh viên
+  </footer>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="js/bai1.js"></script>
+</body>
+</html>
