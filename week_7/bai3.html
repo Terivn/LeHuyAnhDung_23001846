@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bài 3 · Giỏ hàng với Props và $emit (Vue 3)</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">W7</span>
+        <span>
+          VueJS · Week 7
+          <small>Bài tập thực hành số 7</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="index.html">Trang chủ</a>
+        <a href="bai1.html">Bài 1 · Danh sách sản phẩm</a>
+        <a href="bai2.html">Bài 2 · Component sản phẩm</a>
+        <a class="is-active" href="bai3.html">Bài 3 · Giỏ hàng $emit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="app" v-cloak>
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>Bài 3 · Event $emit & Custom Events</span>
+      <h1>Giỏ hàng với Props và $emit</h1>
+      <p>
+        Component cha giữ dữ liệu. Component con <code>&lt;dong-gio-hang&gt;</code> truyền thông tin thay đổi ngược lên cha thông qua sự kiện <code>doi-so-luong</code> và <code>yeu-cau-xoa</code>.
+      </p>
+    </div>
+
+    <!-- Kết quả kiểm tra chuẩn đề bài -->
+    <div class="alert alert--info" style="justify-content: space-between;">
+      <span>
+        📌 <strong>Kết quả kiểm tra mẫu:</strong> 2 bút giá 5.000đ + 3 vở giá 12.000đ &rarr; Tổng số lượng: <strong>5</strong>, Tổng tiền: <strong>46.000 đ</strong>.
+      </span>
+      <button class="btn btn--outline btn--sm" type="button" @click="resetTestCaseStandard">
+        Tải dữ liệu mẫu
+      </button>
+    </div>
+
+    <!-- Bảng giỏ hàng -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Chi tiết giỏ hàng</h2>
+        <span class="badge badge--accent" v-if="gioHang.length > 0">
+          {{ gioHang.length }} mặt hàng
+        </span>
+      </div>
+
+      <!-- Hiển thị bảng khi giỏ hàng có sản phẩm -->
+      <div class="table-wrap" v-if="gioHang.length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>Đơn giá</th>
+              <th style="width: 170px;">Số lượng (1–99)</th>
+              <th>Thành tiền</th>
+              <th style="width: 90px;">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Component con <dong-gio-hang> -->
+            <dong-gio-hang
+              v-for="item in gioHang"
+              :key="item.id"
+              :item="item"
+              @doi-so-luong="xuLyDoiSoLuong"
+              @yeu-cau-xoa="xuLyXoaSanPham"
+            ></dong-gio-hang>
+          </tbody>
+          <tfoot>
+            <tr style="background: var(--surface-subtle); font-weight: bold; border-top: 2px solid var(--line);">
+              <td colspan="2">Tổng cộng:</td>
+              <td style="color: var(--primary);">{{ tongSoLuong }} món</td>
+              <td colspan="2" style="font-size: 1.2rem; color: var(--primary);">
+                {{ dinhDangTien(tongTien) }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Hiển thị "Giỏ hàng trống" khi xóa hết sản phẩm -->
+      <div class="empty-state" v-else>
+        <span class="empty-state__icon">🛒</span>
+        <h3>Giỏ hàng trống</h3>
+        <p>Không có sản phẩm nào trong giỏ hàng của bạn.</p>
+        <button class="btn btn--primary" type="button" @click="resetTestCaseStandard" style="margin-top: 12px;">
+          Khôi phục dữ liệu mẫu
+        </button>
+      </div>
+    </section>
+
+    <!-- Thêm sản phẩm vào giỏ hàng -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Thêm mục mới vào giỏ hàng</h2>
+      </div>
+
+      <form @submit.prevent="themVaoGio">
+        <div class="alert alert--warning" v-if="loiForm">
+          <span>⚠️ {{ loiForm }}</span>
+        </div>
+
+        <div class="filter-bar" style="background: transparent; padding: 0; border: none; margin-bottom: 16px;">
+          <div class="field field--grow">
+            <label class="field__label">Tên mặt hàng <span style="color: var(--danger)">*</span></label>
+            <input
+              class="input"
+              type="text"
+              v-model="sanPhamMoi.ten"
+              placeholder="VD: Bút chì 2B"
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label">Đơn giá (VNĐ) <span style="color: var(--danger)">*</span></label>
+            <input
+              class="input"
+              type="number"
+              min="1"
+              v-model.number="sanPhamMoi.donGia"
+              placeholder="VD: 15000"
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label">Số lượng (1–99)</label>
+            <input
+              class="input"
+              type="number"
+              min="1"
+              max="99"
+              v-model.number="sanPhamMoi.soLuong"
+            />
+          </div>
+        </div>
+
+        <button class="btn btn--primary" type="submit">
+          + Thêm vào giỏ
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài 3: Giỏ hàng với props và $emit
+  </footer>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="components/DongGioHang.js"></script>
+  <script src="js/bai3.js"></script>
+</body>
+</html>

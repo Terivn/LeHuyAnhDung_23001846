@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bài 2 · Danh mục sản phẩm bằng Component (Vue 3)</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">W7</span>
+        <span>
+          VueJS · Week 7
+          <small>Bài tập thực hành số 7</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="index.html">Trang chủ</a>
+        <a href="bai1.html">Bài 1 · Danh sách sản phẩm</a>
+        <a class="is-active" href="bai2.html">Bài 2 · Component sản phẩm</a>
+        <a href="bai3.html">Bài 3 · Giỏ hàng $emit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="app" v-cloak>
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>Bài 2 · Component & Props</span>
+      <h1>Danh mục sản phẩm bằng Component &lt;the-san-pham&gt;</h1>
+      <p>
+        Sử dụng component tái sử dụng, khai báo Props kiểu dữ liệu, prop bắt buộc và prop mặc định. Trạng thái ẩn/hiện mô tả độc lập giữa từng thẻ.
+      </p>
+    </div>
+
+    <!-- Mạng các component <the-san-pham> -->
+    <section class="products-grid">
+      <the-san-pham
+        v-for="sp in danhSachSanPham"
+        :key="sp.id"
+        :ten="sp.ten"
+        :gia="sp.gia"
+        :anh="sp.anh"
+        :mo-ta="sp.moTa"
+        :so-luong-ton="sp.soLuongTon"
+      ></the-san-pham>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài 2: Danh mục sản phẩm bằng component &lt;the-san-pham&gt;
+  </footer>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="components/TheSanPham.js"></script>
+  <script src="js/bai2.js"></script>
+</body>
+</html>

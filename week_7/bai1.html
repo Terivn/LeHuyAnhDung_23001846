@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bài 1 · Quản lý danh sách sản phẩm (Vue 3)</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">W7</span>
+        <span>
+          VueJS · Week 7
+          <small>Bài tập thực hành số 7</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a href="index.html">Trang chủ</a>
+        <a class="is-active" href="bai1.html">Bài 1 · Danh sách sản phẩm</a>
+        <a href="bai2.html">Bài 2 · Component sản phẩm</a>
+        <a href="bai3.html">Bài 3 · Giỏ hàng $emit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="app" v-cloak>
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>Bài 1 · Directive, Computed & Watch</span>
+      <h1>Quản lý sản phẩm & Thống kê</h1>
+      <p>
+        Tìm kiếm, lọc danh mục, sắp xếp giá linh hoạt. Trạng thái trang: 
+        <strong style="color: var(--primary);">{{ trangThaiTrang }}</strong>
+      </p>
+    </div>
+
+    <!-- Thông báo từ watch (khi từ khóa có đúng 1 ký tự) -->
+    <div class="alert alert--warning" v-if="thongBaoTuKhoa">
+      <span>⚠️ {{ thongBaoTuKhoa }}</span>
+    </div>
+
+    <!-- Thống kê Computed -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-card__label">Số sản phẩm hiển thị</span>
+        <span class="stat-card__value">{{ thongKeSoLuong }} sản phẩm</span>
+        <span class="stat-card__sub">Khớp với bộ lọc hiện tại</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Tổng giá trị tồn kho đang hiện</span>
+        <span class="stat-card__value">{{ dinhDangTien(tongGiaTriTonKho) }}</span>
+        <span class="stat-card__sub">Bằng (Giá × Số lượng tồn)</span>
+      </div>
+    </div>
+
+    <!-- Thanh tìm kiếm & bộ lọc -->
+    <div class="filter-bar">
+      <div class="field field--grow">
+        <label class="field__label" for="txtSearch">Tìm kiếm sản phẩm</label>
+        <input
+          id="txtSearch"
+          class="input"
+          type="text"
+          v-model="tuKhoaTimKiem"
+          placeholder="Nhập tên sản phẩm cần tìm..."
+        />
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="selCategory">Danh mục</label>
+        <select id="selCategory" class="select" v-model="danhMucDuocChon">
+          <option v-for="cat in danhSachDanhMuc" :key="cat" :value="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="selSort">Sắp xếp theo giá</label>
+        <select id="selSort" class="select" v-model="kieuSapXep">
+          <option value="mac-dinh">Mặc định (Không đổi mảng gốc)</option>
+          <option value="gia-tang">Giá: Thấp đến Cao</option>
+          <option value="gia-giam">Giá: Cao đến Thấp</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Bảng danh sách sản phẩm -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Danh sách sản phẩm</h2>
+      </div>
+
+      <div class="table-wrap" v-if="dsSanPhamDaLoc.length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tên sản phẩm</th>
+              <th>Danh mục</th>
+              <th>Đơn giá</th>
+              <th>Tồn kho</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="sp in dsSanPhamDaLoc" :key="sp.id">
+              <td>#{{ sp.id }}</td>
+              <td><strong>{{ sp.ten }}</strong></td>
+              <td><span class="badge badge--accent">{{ sp.danhMuc }}</span></td>
+              <td>{{ dinhDangTien(sp.gia) }}</td>
+              <td>{{ sp.soLuongTon }}</td>
+              <td>
+                <span class="badge" :class="sp.soLuongTon > 0 ? 'badge--success' : 'badge--danger'">
+                  {{ sp.soLuongTon > 0 ? 'Còn hàng' : 'Hết hàng' }}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn btn--danger btn--sm"
+                  type="button"
+                  @click="xoaSanPham(sp.id, sp.ten)"
+                >
+                  Xóa
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Không tìm thấy sản phẩm -->
+      <div class="empty-state" v-else>
+        <span class="empty-state__icon">🔍</span>
+        <h3>Không tìm thấy sản phẩm phù hợp</h3>
+        <p>Vui lòng thử thay đổi từ khóa tìm kiếm hoặc bỏ bớt bộ lọc.</p>
+      </div>
+    </section>
+
+    <!-- Form thêm sản phẩm mới -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="panel__title">Thêm sản phẩm mới</h2>
+      </div>
+
+      <form @submit.prevent="themSanPham">
+        <div class="alert alert--warning" v-if="loiForm">
+          <span>⚠️ {{ loiForm }}</span>
+        </div>
+
+        <div class="filter-bar" style="background: transparent; padding: 0; border: none; margin-bottom: 16px;">
+          <div class="field field--grow">
+            <label class="field__label">Tên sản phẩm <span style="color: var(--danger)">*</span></label>
+            <input
+              class="input"
+              type="text"
+              v-model="spMoi.ten"
+              placeholder="VD: Bàn phím cơ Bluetooth"
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label">Giá sản phẩm (VNĐ) <span style="color: var(--danger)">*</span></label>
+            <input
+              class="input"
+              type="number"
+              min="1"
+              v-model.number="spMoi.gia"
+              placeholder="VD: 500000"
+            />
+          </div>
+
+          <div class="field">
+            <label class="field__label">Danh mục</label>
+            <select class="select" v-model="spMoi.danhMuc">
+              <option value="Điện tử">Điện tử</option>
+              <option value="Gia dụng">Gia dụng</option>
+              <option value="Thời trang">Thời trang</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field__label">Số lượng tồn kho <span style="color: var(--danger)">*</span></label>
+            <input
+              class="input"
+              type="number"
+              min="0"
+              step="1"
+              v-model.number="spMoi.soLuongTon"
+              placeholder="VD: 10"
+            />
+          </div>
+        </div>
+
+        <button class="btn btn--primary" type="submit">
+          + Thêm sản phẩm
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài 1: Danh sách sản phẩm có tìm kiếm và thống kê
+  </footer>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="js/bai1.js"></script>
+</body>
+</html>

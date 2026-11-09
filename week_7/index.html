@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bài tập thực hành Vue 3 · Tuần 7</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">W7</span>
+        <span>
+          VueJS · Week 7
+          <small>Bài tập thực hành số 7</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <a class="is-active" href="index.html">Trang chủ</a>
+        <a href="bai1.html">Bài 1 · Danh sách sản phẩm</a>
+        <a href="bai2.html">Bài 2 · Component sản phẩm</a>
+        <a href="bai3.html">Bài 3 · Giỏ hàng $emit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>Tổng quan bài tập</span>
+      <h1>Bài tập thực hành Vue 3 — Tuần 7</h1>
+      <p>
+        Thực hành chuyên sâu về Directive, Computed, Watch, Mounted, Component, Props và Custom Event $emit trong Vue 3.
+      </p>
+    </div>
+
+    <div class="products-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+      <!-- Card Bài 1 -->
+      <article class="panel" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <span class="badge badge--accent" style="margin-bottom: 12px;">Bài 1</span>
+          <h2 style="margin: 0 0 8px; font-size: 1.3rem;">Danh sách sản phẩm có tìm kiếm và thống kê</h2>
+          <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 16px;">
+            Directive, methods, computed, watch, mounted. Tìm kiếm không phân biệt hoa/thường, lọc danh mục, sắp xếp giá không đổi mảng gốc, validate form thêm mới, xóa có xác nhận.
+          </p>
+        </div>
+        <a class="btn btn--primary" href="bai1.html">Xem Bài 1 &rarr;</a>
+      </article>
+
+      <!-- Card Bài 2 -->
+      <article class="panel" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <span class="badge badge--accent" style="margin-bottom: 12px;">Bài 2</span>
+          <h2 style="margin: 0 0 8px; font-size: 1.3rem;">Danh mục sản phẩm bằng Component</h2>
+          <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 16px;">
+            Đăng ký component <code>&lt;the-san-pham&gt;</code>, nạp file JS riêng, khai báo type validation cho props (required, default), bật/tắt mô tả riêng biệt từng thẻ, khóa nút mua khi hết hàng.
+          </p>
+        </div>
+        <a class="btn btn--primary" href="bai2.html">Xem Bài 2 &rarr;</a>
+      </article>
+
+      <!-- Card Bài 3 -->
+      <article class="panel" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <span class="badge badge--accent" style="margin-bottom: 12px;">Bài 3</span>
+          <h2 style="margin: 0 0 8px; font-size: 1.3rem;">Giỏ hàng với Props và $emit</h2>
+          <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 16px;">
+            Luồng dữ liệu một chiều strict data binding, sự kiện tùy chỉnh <code>doi-so-luong</code> và <code>yeu-cau-xoa</code> từ <code>&lt;dong-gio-hang&gt;</code>, computed tính tổng tiền &amp; tổng số lượng, xử lý giỏ hàng trống.
+          </p>
+        </div>
+        <a class="btn btn--primary" href="bai3.html">Xem Bài 3 &rarr;</a>
+      </article>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Báo cáo bài tập thực hành Vue 3 (Tuần 7)
+  </footer>
+</body>
+</html>
