@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý sản phẩm · PHP API + Vue.js</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ctext x='16' y='22' font-size='16' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EW8%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="index.html">
+        <span class="brand__mark">W8</span>
+        <span>
+          PHP API + Vue.js
+          <small>Bài tập thực hành tuần 8</small>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Điều hướng">
+        <a class="is-active" href="index.html">Quản lý sản phẩm</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="app" v-cloak>
+    <div class="page-head">
+      <span class="eyebrow"><span class="eyebrow__dot"></span>CRUD · PHP PDO + Vue 3</span>
+      <h1>Quản lý sản phẩm</h1>
+      <p>
+        Danh sách sản phẩm được tải từ <code>api/products.php</code>. Thêm, sửa, xóa trực tiếp
+        trên giao diện — bảng tự cập nhật mà không cần tải lại trang.
+      </p>
+    </div>
+
+    <!-- Thông báo thành công / lỗi -->
+    <div
+      v-if="message"
+      class="alert"
+      :class="messageType === 'success' ? 'alert--success' : 'alert--error'"
+      role="status"
+    >
+      <span>{{ messageType === 'success' ? '✅' : '⚠️' }}</span>
+      <span>{{ message }}</span>
+      <button class="alert__close" type="button" aria-label="Đóng thông báo" @click="message = ''">×</button>
+    </div>
+
+    <!-- Thống kê nhanh -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-card__label">Tổng sản phẩm</span>
+        <span class="stat-card__value">{{ products.length }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Tổng số lượng tồn</span>
+        <span class="stat-card__value">{{ totalStock }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Giá trị tồn kho</span>
+        <span class="stat-card__value">{{ formatPrice(totalValue) }}</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <!-- ================= BẢNG SẢN PHẨM ================= -->
+      <section class="panel panel--table">
+        <div class="panel__head">
+          <h2 class="panel__title">Danh sách sản phẩm</h2>
+          <button class="btn btn--soft btn--sm" type="button" :disabled="loading" @click="fetchProducts">
+            {{ loading ? 'Đang tải…' : '↻ Tải lại' }}
+          </button>
+        </div>
+
+        <div v-if="loading && products.length === 0" class="state-box">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Đang tải danh sách sản phẩm…</p>
+        </div>
+
+        <div v-else-if="products.length === 0" class="state-box">
+          <span class="state-box__icon">📦</span>
+          <h3>Chưa có sản phẩm nào</h3>
+          <p>Hãy dùng biểu mẫu bên cạnh để thêm sản phẩm đầu tiên.</p>
+        </div>
+
+        <div v-else class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th class="text-right">Đơn giá</th>
+                <th class="text-center">Số lượng tồn</th>
+                <th class="text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="product in products" :key="product.id">
+                <td class="text-muted">#{{ product.id }}</td>
+                <td><strong>{{ product.name }}</strong></td>
+                <td class="text-right">{{ formatPrice(product.price) }}</td>
+                <td class="text-center">
+                  <span class="badge" :class="product.stock > 0 ? 'badge--success' : 'badge--danger'">
+                    {{ product.stock }}
+                  </span>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button class="btn btn--soft btn--sm" type="button" @click="editProduct(product)">
+                      Sửa
+                    </button>
+                    <button class="btn btn--danger btn--sm" type="button" @click="deleteProduct(product)">
+                      Xóa
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= BIỂU MẪU THÊM / SỬA ================= -->
+      <section class="panel panel--form">
+        <div class="panel__head">
+          <h2 class="panel__title">
+            {{ isEditing ? 'Sửa sản phẩm #' + form.id : 'Thêm sản phẩm mới' }}
+          </h2>
+        </div>
+
+        <!-- novalidate: tự hiển thị lỗi thân thiện thay vì bong bóng mặc định của trình duyệt -->
+        <form class="form" novalidate @submit.prevent="saveProduct">
+          <div class="field">
+            <label class="field__label" for="inputName">
+              Tên sản phẩm <span class="required">*</span>
+            </label>
+            <input
+              id="inputName"
+              class="input"
+              type="text"
+              maxlength="100"
+              v-model="form.name"
+              placeholder="VD: Bút bi"
+            />
+            <span class="field__hint">{{ form.name.trim().length }}/100 ký tự</span>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="inputPrice">
+              Đơn giá (đồng) <span class="required">*</span>
+            </label>
+            <input
+              id="inputPrice"
+              class="input"
+              type="number"
+              min="1"
+              step="1"
+              v-model.number="form.price"
+              placeholder="VD: 5000"
+            />
+            <span class="field__hint">Số nguyên lớn hơn 0</span>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="inputStock">
+              Số lượng tồn <span class="required">*</span>
+            </label>
+            <input
+              id="inputStock"
+              class="input"
+              type="number"
+              min="0"
+              step="1"
+              v-model.number="form.stock"
+              placeholder="VD: 20"
+            />
+            <span class="field__hint">Số nguyên không âm (≥ 0)</span>
+          </div>
+
+          <p v-if="formError" class="form-error">⚠️ {{ formError }}</p>
+
+          <div class="form__actions">
+            <button class="btn btn--primary" type="submit" :disabled="submitting">
+              {{ submitting ? 'Đang lưu…' : (isEditing ? 'Lưu thay đổi' : 'Thêm sản phẩm') }}
+            </button>
+            <button
+              v-if="isEditing"
+              class="btn btn--outline"
+              type="button"
+              :disabled="submitting"
+              @click="resetForm"
+            >
+              Hủy
+            </button>
+          </div>
+
+          <p class="form__note">
+            <template v-if="isEditing">
+              Đang gửi <code>PUT api/products.php?id={{ form.id }}</code>
+            </template>
+            <template v-else>
+              Đang gửi <code>POST api/products.php</code>
+            </template>
+          </p>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <strong>Lê Huy Anh Dũng · 23001846</strong> — Bài tập thực hành tuần 8: PHP API + Vue.js
+  </footer>
+
+  <script src="vendor/vue.global.prod.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
